@@ -7,6 +7,8 @@ var path = require('path');
 
 var databaseUri = process.env.DATABASE_URI || process.env.MONGODB_URI;
 
+var S3Adapter = require('parse-server').S3Adapter;
+
 if (!databaseUri) {
   console.log('DATABASE_URI not specified, falling back to localhost.');
 }
@@ -17,8 +19,35 @@ var api = new ParseServer({
   appId: process.env.APP_ID || 'myAppId',
   masterKey: process.env.MASTER_KEY || '', //Add your master key here. Keep it secret!
   serverURL: process.env.SERVER_URL || 'http://localhost:1337/parse',  // Don't forget to change to https if needed
+  filesAdapter: new S3Adapter(
+    process.env.S3_ACCESS_KEY,
+    process.env.S3_SECRET_KEY,
+    process.env.S3_BUCKET,
+    {directAccess: true}
+  ),
   liveQuery: {
     classNames: ["Posts", "Comments"] // List of classes to support for query subscriptions
+  },
+  // Enable email verification
+  verifyUserEmails: true,
+  preventLoginWithUnverifiedEmail: false, // defaults to false
+  // The public URL of your app.
+  // This will appear in the link that is used to verify email addresses and reset passwords.
+  // Set the mount path as it is in serverURL
+  publicServerURL: process.env.SERVER_URL,
+  // Your apps name. This will appear in the subject and body of the emails that are sent.
+  appName: 'Wholesome App',
+  // The email adapter
+  emailAdapter: {
+    module: '@parse/simple-mailgun-adapter',
+    options: {
+      // The address that your emails come from
+      fromAddress: 'postmaster@mg.wholesomeapp.com',
+      // Your domain from mailgun.com
+      domain: process.env.MAILGUN_DOMAIN,
+      // Your API key from mailgun.com
+      apiKey: process.env.MAILGUN_KEY,
+    }
   }
 });
 // Client-keys like the javascript key or the .NET key are not necessary with parse-server
