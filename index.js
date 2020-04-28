@@ -20,8 +20,6 @@ var api = new ParseServer({
   masterKey: process.env.MASTER_KEY,
   serverURL: process.env.SERVER_URL,
   filesAdapter: new S3Adapter(
-    process.env.S3_ACCESS_KEY,
-    process.env.S3_SECRET_KEY,
     process.env.S3_BUCKET,
     {directAccess: true}
   ),
